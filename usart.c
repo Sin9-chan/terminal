@@ -219,10 +219,11 @@ int main(void)
 			if (strncmp(RX_BUF, "PRINT CHAR", 10) == 0) {
 				USARTSend("\r\nTHIS IS A COMMAND \"PRINT\"!!!\r\n");
 				LCD_CLEAR();
-				for(i=0;i<RX_BUF_SIZE;i++)
+				for(i=0;i<RX_BUF_SIZE-5;i++)
 				{
 					buffer[i]=RX_BUF[i+5];
 				}
+				USARTSend(buffer);
 				LCD_W("You wrote: \r\n");
 				LCD_W(buffer);
 				
@@ -230,10 +231,11 @@ int main(void)
 			if (strncmp(RX_BUF, "PRINT NUM", 9) == 0) {
 				USARTSend("\r\nTHIS IS A COMMAND \"PRINT\"!!!\r\n");
 				LCD_CLEAR();
-				for(i=0;i<RX_BUF_SIZE;i++)
+				for(i=0;i<RX_BUF_SIZE-9;i++)
 				{
 					buffer[i]=RX_BUF[i+9];
 				}
+				USARTSend(buffer);
 				long int num;
 				sscanf(buffer, "%ld", &num);
 				LCD_W("You wrote: \r\n");
