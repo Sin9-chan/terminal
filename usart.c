@@ -12,6 +12,8 @@
 #include "ADC_init.h"
 #include "LCD_init.h"
 #include "LCD2_init.h"
+#include "stdio.h"
+#include "DMA_INIT.h"
  
 #define RX_BUF_SIZE 80
 
@@ -21,7 +23,10 @@
  char RXi;
  char RXc;
  char RX_BUF[RX_BUF_SIZE] = {'\0'};
- char buffer[80] = {'\0'};
+ char buffer[5] = {'\0'};
+ char AddBuf[32];
+ char AddBuf1[32] = {'\0'};
+ 
  
 
 	uint32_t  ADC_out1;
@@ -144,9 +149,12 @@ int main(void)
 		DelayInit();
 		usart_init();
 		ADC_init();
-		//i2c_init();
-		//LCD2_init();
-	 // lcd_i2c_init();
+		i2c_init();
+		LCD2_init();
+	 // ADC_DMA_init();
+	 //lcd_i2c_init();
+	
+	
 		LCD_W(" SEREGA MOLODEC {} ,. >< <> &%$#sdfsdgsgs1241515adhadhadhadhdf@");
 		LCD_DEC(C1);
 		_delay_ms(2000);
@@ -157,6 +165,7 @@ int main(void)
 		// line 2: 0x40
 		// line 3: 0x94
 		// line 4: 0x54
+		uint8_t Transmit_Buffer[9];
 	 
 	
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1,ENABLE);
@@ -172,22 +181,22 @@ int main(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);
  
     GPIO_ResetBits(GPIOC, GPIO_Pin_13); // Set C13 to Low level ("0")
- 
+		
+		char BUF_2;
     // Initialize USART
     usart_init();
     USARTSend(" Hello.\r\nUSART1 is ready.\r\n");
  
     while (1)
-    {		//RX_BUF_TXT=RX_BUF;
+    {		
         if (RX_FLAG_END_LINE == 1) {
-            // Reset END_LINE Flag
             RX_FLAG_END_LINE = 0;
  
             USARTSend("\r\nI has received a line:\r\n");
             USARTSend(RX_BUF);
             USARTSend("\r\n");
  
-            if (strncmp(RX_BUF, "ON\r", 2) == 0) {
+					if (strncmp(RX_BUF, "ON\r", 3) == 0) {
                 USARTSend("\r\nTHIS IS A COMMAND \"ON\"!!!\r\n");
                 GPIO_ResetBits(GPIOC, GPIO_Pin_13);			
             }
@@ -197,11 +206,30 @@ int main(void)
 						}
 						if (strncmp(RX_BUF, "LCD_CLEAR\r", 8) == 0) {
 								USARTSend("\r\nTHIS IS A COMMAND \"LCD clear\"!!!\r\n");
-			LCD_CLEAR();
+						LCD_CLEAR();
+						BUF_2=254;
+            sprintf(buffer, "\r\n%d ", BUF_2);
+            USARTSend(buffer);
+            }
+						if (strncmp(RX_BUF, "PRINT", 4) == 0) {
+						USARTSend("\r\nTHIS IS A COMMAND \"PRINT\"!!!\r\n");
+						LCD_CLEAR();
+						for (RXi=6; RXi<RX_BUF_SIZE; RXi++)
+							AddBuf1[RXi] = RX_BUF[RXi];
+            sprintf(AddBuf, "\r\n%s ", AddBuf1);
+            USARTSend(AddBuf);
+						LCD_W(AddBuf);
             }
 						if (strncmp(RX_BUF, "BATA_V_HATE\r", 8) == 0) {
-            USARTSend("\r\nTHIS IS A COMMAND \"LCD clear\"!!!\r\n");
-			LCD_CLEAR();
+								sprintf((char*)Transmit_Buffer, "ADC=%d", ADC_out1);
+							 USARTSend("\r\nTHIS IS A COMMAND \"LCD clear\"!!!\r\n");
+							 //BUF_2=0x33;
+							// USARTSend(&BUF_2);
+						 	 BUF_2=0x03;
+							 USARTSend(&BUF_2);
+							 BUF_2=0x08;
+							 USARTSend(&BUF_2);
+							 LCD_CLEAR();
 													ADC_out1=(int)ADC_out1/10;
 													ADC_out2=(int)ADC_out2/10;
 													ADC_out1_V=ADC_out1/1000;
@@ -212,9 +240,7 @@ int main(void)
 							LCD_W("                     ");
 							LCD_DEC(ADC_out1_mV);
 							LCD_W("       ");
-							LCD_DEC(RXc);
-							    for (RXi=0; RXi<RX_BUF_SIZE; RXi++)
-									{LCD_DEC(RX_BUF[RXi]);}
+						
             }
 						if (strncmp(RX_BUF, "lcd_i2c_clear\r", 10) == 0) {
             USARTSend("\r\nTHIS IS A COMMAND \"LCD clear\"!!!\r\n");
@@ -233,7 +259,8 @@ int main(void)
 			
 						 if (strncmp(RX_BUF, "lcd_i2c_adc\r", 10) == 0) {
                 USARTSend("\r\nTHIS IS A COMMAND \"LCD\"!!!\r\n");
-                
+                ADC_out1=0x33;
+							 USARTSend((char*)ADC_out1);
 						ADC_out1=(int)ADC_out1/10;
 						ADC_out2=(int)ADC_out2/10;
 						ADC_out1_V=ADC_out1/1000;
