@@ -210,7 +210,7 @@ int main(void)
 					buffer[RXii]=RX_BUF_ADD[RXii+11];
 				}
 				USARTSend(buffer);
-				LCD_W("You wrote: \r\n");
+				LCD_W("You wrote: ");
 				LCD_W(buffer);
 				
             }
@@ -224,7 +224,7 @@ int main(void)
 				USARTSend(buffer);
 				long int num;
 				sscanf(buffer, "%ld", &num);
-				LCD_W("You wrote: \r\n");
+				LCD_W("You wrote: ");
 				LCD_DEC(num);
 				
             }
