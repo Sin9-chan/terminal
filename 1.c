@@ -207,6 +207,9 @@ int main(void)
 				LCD_CLEAR();
 				for(RXii=0;RXii<RX_BUF_SIZE-11;RXii++)
 				{
+					if (RX_BUF_ADD[RXii+11]==13)
+						buffer[RXii]='\0';
+					else
 					buffer[RXii]=RX_BUF_ADD[RXii+11];
 				}
 				USARTSend(buffer);
