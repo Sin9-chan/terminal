@@ -19,9 +19,11 @@
 
 char RX_FLAG_END_LINE = 0;
 char RXi;
+char RXii;
 char RXc;
 char RX_BUF[RX_BUF_SIZE] = {'\0'};
 char buffer[80] = {'\0'};
+char RX_BUF_ADD[RX_BUF_SIZE] = {'\0'};
  
 
 uint32_t  ADC_out1;
@@ -47,6 +49,7 @@ void USART1_IRQHandler(void)
     {
             RXc = USART_ReceiveData(USART1);
             RX_BUF[RXi] = RXc;
+			RX_BUF_ADD[RXi] = RXc;
             RXi++;
  
             if (RXc != 13) {
@@ -202,9 +205,9 @@ int main(void)
 			if (strncmp(RX_BUF, "PRINT CHAR", 10) == 0) {
 				USARTSend("\r\nTHIS IS A COMMAND \"PRINT\"!!!\r\n");
 				LCD_CLEAR();
-				for(i=0;i<RX_BUF_SIZE-11;i++)
+				for(RXii=0;RXii<RX_BUF_SIZE-11;RXii++)
 				{
-					buffer[i]=RX_BUF[i+11];
+					buffer[RXii]=RX_BUF_ADD[RXii+11];
 				}
 				USARTSend(buffer);
 				LCD_W("You wrote: \r\n");
@@ -214,9 +217,9 @@ int main(void)
 			if (strncmp(RX_BUF, "PRINT NUM", 9) == 0) {
 				USARTSend("\r\nTHIS IS A COMMAND \"PRINT\"!!!\r\n");
 				LCD_CLEAR();
-				for(i=0;i<RX_BUF_SIZE-10;i++)
+				for(RXii=0;RXii<RX_BUF_SIZE-10;RXii++)
 				{
-					buffer[i]=RX_BUF[i+10];
+					buffer[RXii]=RX_BUF_ADD[RXii+10];
 				}
 				USARTSend(buffer);
 				long int num;
