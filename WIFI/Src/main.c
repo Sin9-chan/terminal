@@ -97,6 +97,8 @@ int main(void)
   MX_ADC2_Init();
   MX_SPI3_Init();
   MX_USART3_UART_Init();
+	
+	
 
   /* USER CODE BEGIN 2 */
 
@@ -119,6 +121,18 @@ int main(void)
 	while(HAL_SPI_GetState(&hspi3)!=HAL_SPI_STATE_READY);
 	HAL_SPI_Receive(&hspi3,(uint8_t*) data_get,1,100);
 	
+	
+/* Size of Transmission buffer */
+#define TXBUFFERSIZE                      (COUNTOF(aTxBuffer) - 1)
+/* Size of Reception buffer */
+#define RXBUFFERSIZE                      TXBUFFERSIZE
+	
+	/* Exported macro ------------------------------------------------------------*/
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+/* Exported functions ------------------------------------------------------- */
+
+
+	uint8_t aTxBuffer[] = " **** UART_TwoBoards_ComPolling ****  **** UART_TwoBoards_ComPolling ****  **** UART_TwoBoards_ComPolling **** ";
 		
   while (1)
   {
@@ -139,18 +153,9 @@ int main(void)
 				USARTSend("\r\nTHIS IS A COMMAND \"ON\"!!!\r\n");
 				GPIO_ResetBits(GPIOC, GPIO_Pin_13);	
 				USARTSend("\r\nI has received a line:\r\n");*/
-		strncmp(RX_BUF, "\r\nI has received a line:\r\n", 30);
-		RX_BUF[0]=0x33;
-		RX_BUF[1]=0x33;
-		RX_BUF[2]=0x33;
-		RX_BUF[3]=0x33;
-		RX_BUF[4]=0x33;
-		RX_BUF[5]=0x33;
-		RX_BUF[6]=0x33;
-		RX_BUF[7]=0x33;
-		RX_BUF[8]=0x33;
 		
-		HAL_UART_Transmit( &huart3, (uint8_t*) RX_BUF, 8, 30);
+		HAL_UART_Transmit(&huart3, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000);
+		//HAL_UART_Transmit( &huart3, (uint8_t*) RX_BUF, 8, 30);
 		HAL_Delay(1000);
 		
 	HAL_SPI_Transmit(&hspi3,(uint8_t*) data_get,1,100);// uint8_t *pData, uint16_t Size, uint32_t Timeout
