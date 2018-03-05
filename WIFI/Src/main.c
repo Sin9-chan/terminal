@@ -53,6 +53,9 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+#define TXBUFFERSIZE                      (COUNTOF(aTxBuffer) - 1)
+#define RXBUFFERSIZE                      TXBUFFERSIZE
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 
 /* USER CODE END PV */
 
@@ -107,67 +110,42 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-	__IO uint8_t data_send[10] = {0,7,165,0,10,5,6,7,8,9},data_get[10]={7,85,165,0,10,5,6,7,8,9};
-//	uint8_t TTXE1;
-//SPI_DR_DR= 0;
-	//TTXE1=SPI_SR_TXE;
-	#define RX_BUF_SIZE 80
-		
-	char RX_BUF[RX_BUF_SIZE] = {'\0'};
-	
-	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_RESET);
-	HAL_Delay(1000);
+	__IO uint8_t data_send[10] = {0,7,165,0,10,5,6,7,8,9}, data_get[10] = {7,85,165,0,10,5,6,7,8,9};
+
+	//HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_RESET);
+	//HAL_Delay(1000);
 	HAL_SPI_Transmit(&hspi3,(uint8_t*) data_send,1,200);
-	while(HAL_SPI_GetState(&hspi3)!=HAL_SPI_STATE_READY);
-	HAL_SPI_Receive(&hspi3,(uint8_t*) data_get,1,100);
+	while(HAL_SPI_GetState(&hspi3)!=HAL_SPI_STATE_READY)
+	{
+		HAL_SPI_Receive(&hspi3,(uint8_t*) data_get,1,100);
+	}
 	
-	
-/* Size of Transmission buffer */
-#define TXBUFFERSIZE                      (COUNTOF(aTxBuffer) - 1)
-/* Size of Reception buffer */
-#define RXBUFFERSIZE                      TXBUFFERSIZE
-	
-	/* Exported macro ------------------------------------------------------------*/
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
-/* Exported functions ------------------------------------------------------- */
 
 
-	uint8_t aTxBuffer[] = " **** UART_TwoBoards_ComPolling ****  **** UART_TwoBoards_ComPolling ****  **** UART_TwoBoards_ComPolling **** ";
+
+	uint8_t aTxBuffer[] = " HELLO, WORLD! ";
+	uint8_t aRxBuffer[RXBUFFERSIZE];
 		
   while (1)
   {
-			//HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_RESET);
-			//HAL_Delay(1000);
-			//HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_SET);
-			//HAL_Delay(1000);
-			//uint8_t TTXE1;
-			      /*if (RX_FLAG_END_LINE == 1) {
-            // Reset END_LINE Flag
-            RX_FLAG_END_LINE = 0;
- 
-            USARTSend("\r\nI has received a line:\r\n");
-            USARTSend(RX_BUF);
-            USARTSend("\r\n");
- 
-			if (strncmp(RX_BUF, "ON\r", 2) == 0) {
-				USARTSend("\r\nTHIS IS A COMMAND \"ON\"!!!\r\n");
-				GPIO_ResetBits(GPIOC, GPIO_Pin_13);	
-				USARTSend("\r\nI has received a line:\r\n");*/
+
 		
-		HAL_UART_Transmit(&huart3, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000);
-		//HAL_UART_Transmit( &huart3, (uint8_t*) RX_BUF, 8, 30);
-		HAL_Delay(1000);
+		//HAL_UART_Transmit(&huart3, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000);
+		//HAL_Delay(1000);
+		HAL_UART_Receive(&huart3, (uint8_t *)aRxBuffer, RXBUFFERSIZE, 5000);
 		
-	HAL_SPI_Transmit(&hspi3,(uint8_t*) data_get,1,100);// uint8_t *pData, uint16_t Size, uint32_t Timeout
-	while(HAL_SPI_GetState(&hspi3)!=HAL_SPI_STATE_READY);
-	//HAL_SPI_Transmit(&hspi3,(uint8_t*) data_send,1,100);// uint8_t *pData, uint16_t Size, uint32_t Timeout
-	//while(HAL_SPI_GetState(&hspi3)!=HAL_SPI_STATE_READY);		
-			//SPI
-			//SPI_SR: FRE BSY OVR MODF CRCERR UDR CHSIDE TXE RXNE
-			 
-		
-		
-			//GPIOE_BSRR = 
+		if (strncmp((char *)aRxBuffer, "ON", 2) == 0) {
+			HAL_UART_Transmit(&huart3, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000);
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_SET);
+			HAL_Delay(1000);
+		}
+		if (strncmp((char *)aRxBuffer, "OFF", 3) == 0) {
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_RESET);
+			HAL_Delay(1000);
+		}
+		HAL_SPI_Transmit(&hspi3,(uint8_t*) data_get,1,100);// uint8_t *pData, uint16_t Size, uint32_t Timeout
+		while(HAL_SPI_GetState(&hspi3)!=HAL_SPI_STATE_READY);
+
 
   /* USER CODE END WHILE */
 
