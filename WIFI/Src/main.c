@@ -53,9 +53,6 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define TXBUFFERSIZE                      (COUNTOF(aTxBuffer) - 1)
-#define RXBUFFERSIZE                      TXBUFFERSIZE
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 
 /* USER CODE END PV */
 
@@ -75,7 +72,9 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+#define TXBUFFERSIZE                      (COUNTOF(aTxBuffer) - 1)
+#define RXBUFFERSIZE                      TXBUFFERSIZE
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -129,19 +128,26 @@ int main(void)
   while (1)
   {
 
-		
+		HAL_UART_Transmit(&huart3, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000);
+
 		//HAL_UART_Transmit(&huart3, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000);
 		//HAL_Delay(1000);
 		HAL_UART_Receive(&huart3, (uint8_t *)aRxBuffer, RXBUFFERSIZE, 5000);
 		
 		if (strncmp((char *)aRxBuffer, "ON", 2) == 0) {
 			HAL_UART_Transmit(&huart3, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000);
+			HAL_UART_Receive(&huart3, (uint8_t *)aRxBuffer, RXBUFFERSIZE, 5000);
+			while (strncmp((char *)aRxBuffer, "OFF", 3) != 0)
+			{
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_RESET);
+			HAL_Delay(100);
 			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_SET);
-			HAL_Delay(1000);
+			HAL_Delay(100);
+			HAL_UART_Receive(&huart3, (uint8_t *)aRxBuffer, RXBUFFERSIZE, 5000);
+			}
 		}
 		if (strncmp((char *)aRxBuffer, "OFF", 3) == 0) {
-			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_RESET);
-			HAL_Delay(1000);
+			HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_SET);
 		}
 		HAL_SPI_Transmit(&hspi3,(uint8_t*) data_get,1,100);// uint8_t *pData, uint16_t Size, uint32_t Timeout
 		while(HAL_SPI_GetState(&hspi3)!=HAL_SPI_STATE_READY);
