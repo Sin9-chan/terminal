@@ -53,9 +53,9 @@ void UserToPMABufferCopy(uint8_t *pbUsrBuf, uint16_t wPMABufAddr, uint16_t wNByt
   pdwVal = (uint16_t *)(wPMABufAddr * 2 + PMAAddr);
   for (i = n; i != 0; i--)
   {
-    temp1 = (uint16_t) * pbUsrBuf;
+    temp1 = (uint16_t) *pbUsrBuf;
     pbUsrBuf++;
-    temp2 = temp1 | (uint16_t) * pbUsrBuf << 8;
+    temp2 = temp1 | (uint16_t) *pbUsrBuf << 8;
     *pdwVal++ = temp2;
     pdwVal++;
     pbUsrBuf++;

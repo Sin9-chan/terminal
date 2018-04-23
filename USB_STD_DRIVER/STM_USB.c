@@ -193,17 +193,32 @@ int main(void)
     	  // If received symbol '1' then LED turn on, else LED turn off
     	  if (Receive_Buffer[0]=='1') {
 						
-						
+						uint16_t *pdwVal;
+						pdwVal = (uint16_t *)(ENDP1_TXADDR * 2 + PMAAddr); //ukazatel na adres i on kakoito ebanutyi
 						TIM2->CR1 |= TIM_CR1_CEN;
 								while (cnt_pix<127)
 								{	
 									cnt_pix++;
-								if (STROB==3)
-								{GPIOA->ODR = 0x0004;
-								Transmit_Buffer[0]=ADCBuffer[0];
-								Transmit_Buffer[1]=ADCBuffer[0]>>8;
-								CDC_Send_DATA ((uint8_t*)Transmit_Buffer,0x02);
-								GPIOA->ODR = 0x0000;}
+									if (STROB==3)
+									{
+										GPIOA->ODR = 0x0004;
+										Transmit_Buffer[0]=ADCBuffer[0];
+										Transmit_Buffer[1]=ADCBuffer[0]>>8;
+										//beri topor ebash hardcod!!
+										*pdwVal++ = (uint16_t)Transmit_Buffer[0] | (uint16_t)Transmit_Buffer[1] << 8;
+										/*
+										//a huly my shlem po 16 bit??
+										*pdwVal++ = Transmit_Buffer[1];
+										pdwVal++;
+										*pdwVal++ = Transmit_Buffer[0];
+										pdwVal++;
+										*/
+										*_pEPTxCount(ENDP1) = 0x02;
+										_SetEPTxStatus(ENDP1, EP_TX_VALID);
+										
+										//CDC_Send_DATA((uint8_t*)Transmit_Buffer,0x02);
+										GPIOA->ODR = 0x0000;
+									}
 								}
 						TIM2->CNT = 0;
 						TIM2->CR1 &= ~TIM_CR1_CEN;
