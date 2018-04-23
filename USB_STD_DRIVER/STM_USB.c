@@ -206,7 +206,8 @@ int main(void)
 										Transmit_Buffer[1]=ADCBuffer[0]>>8;
 										//beri topor ebash hardcod!!
 										*pdwVal++ = (uint16_t)Transmit_Buffer[0] | (uint16_t)Transmit_Buffer[1] << 8;
-										/*
+										//btw nahui my ego popolam delim esli tak mozhem huinut' ????
+										*pdwVal++ = ADCBuffer[0];										/*
 										//a huly my shlem po 16 bit??
 										*pdwVal++ = Transmit_Buffer[1];
 										pdwVal++;
