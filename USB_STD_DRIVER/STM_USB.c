@@ -174,8 +174,9 @@ int main(void)
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   GPIO_SetBits(GPIOA, GPIO_Pin_2);
 	
-	sprintf((char*)Transmit_Buffer, "ADC=%d",  ADCBuffer[0]);
-	
+	//sprintf((char*)Transmit_Buffer, "ADC=%d",  ADCBuffer[0]);
+	uint16_t *pdwVal; //esli ne budet rabotat' eto nado zapilit v while
+	pdwVal = (uint16_t *)(ENDP1_TXADDR * 2 + PMAAddr); //ukazatel na adres i on kakoito ebanutyi
 	
   while (1)
   {
@@ -193,8 +194,6 @@ int main(void)
     	  // If received symbol '1' then LED turn on, else LED turn off
     	  if (Receive_Buffer[0]=='1') {
 						
-						uint16_t *pdwVal;
-						pdwVal = (uint16_t *)(ENDP1_TXADDR * 2 + PMAAddr); //ukazatel na adres i on kakoito ebanutyi
 						TIM2->CR1 |= TIM_CR1_CEN;
 								while (cnt_pix<127)
 								{	
@@ -202,20 +201,17 @@ int main(void)
 									if (STROB==3)
 									{
 										GPIOA->ODR = 0x0004;
-										Transmit_Buffer[0]=ADCBuffer[0];
-										Transmit_Buffer[1]=ADCBuffer[0]>>8;
+										//Transmit_Buffer[0]=ADCBuffer[0]; i vot eto nahui ne nado
+										//Transmit_Buffer[1]=ADCBuffer[0]>>8;
+										
 										//beri topor ebash hardcod!!
-										*pdwVal++ = (uint16_t)Transmit_Buffer[0] | (uint16_t)Transmit_Buffer[1] << 8;
-										//btw nahui my ego popolam delim esli tak mozhem huinut' ????
-										*pdwVal++ = ADCBuffer[0];										/*
-										//a huly my shlem po 16 bit??
-										*pdwVal++ = Transmit_Buffer[1];
+										//*pdwVal++ = (uint16_t)Transmit_Buffer[0] | (uint16_t)Transmit_Buffer[1] << 8;
+										//ESLI YA CHTO TO PONIMAYU DOLZHNO RABOTAT' TAK
+										*pdwVal++ = ADCBuffer[0];			
 										pdwVal++;
-										*pdwVal++ = Transmit_Buffer[0];
-										pdwVal++;
-										*/
-										*_pEPTxCount(ENDP1) = 0x02;
-										_SetEPTxStatus(ENDP1, EP_TX_VALID);
+										*_pEPTxCount(ENDP1) = 0x02; //govorim Tx bufery chto otpravili 2 byte
+										//NAHUYA NAM USER-FRIENDLY MACROSY HUYACROSY DA ?!
+										_SetENDPOINT(ENDP1, (((_GetENDPOINT(ENDP1) & EPTX_DTOGMASK) ^ EP_TX_VALID)| EP_CTR_RX | EP_CTR_TX)); //esli ty ponyal chto tut proishodit s menya tort
 										
 										//CDC_Send_DATA((uint8_t*)Transmit_Buffer,0x02);
 										GPIOA->ODR = 0x0000;
